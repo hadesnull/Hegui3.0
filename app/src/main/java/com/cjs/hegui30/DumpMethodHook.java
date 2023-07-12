@@ -55,7 +55,8 @@ public abstract class DumpMethodHook extends XC_MethodHook {
     private static void dump2(){
         XposedBridge.log("Dump Stack: "+"---------------start----------------");
         Throwable ex = new Throwable();
-        StackTraceElement[] stackElements = ex.getStackTrace();
+//        StackTraceElement[] stackElements = ex.getStackTrace();
+        StackTraceElement[] stackElements = Thread.currentThread().getStackTrace();
         if (stackElements != null) {
             for (int i= 0; i < stackElements.length; i++) {
                 StringBuilder sb=new StringBuilder("[方法栈调用]");

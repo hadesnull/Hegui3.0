@@ -1,7 +1,10 @@
 package com.cjs.hegui30;
 
 import android.app.PendingIntent;
+import android.content.ClipboardManager;
 import android.content.ContentResolver;
+import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.location.Criteria;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -42,17 +45,17 @@ public class HookTrack implements IXposedHookLoadPackage {
 
         Log.e(TAG, "开始加载package:" + lpparam.packageName);
         /*判断hook的包名*/
-        boolean res = false;
-        for (String pkgName : whiteList) {
-            if (pkgName.equals(lpparam.packageName)) {
-                res = true;
-                break;
-            }
-        }
-        if (!res) {
-            Log.e(TAG, "不符合的包:" + lpparam.packageName);
-            return;
-        }
+//        boolean res = false;
+//        for (String pkgName : whiteList) {
+//            if (pkgName.equals(lpparam.packageName)) {
+//                res = true;
+//                break;
+//            }
+//        }
+//        if (!res) {
+//            Log.e(TAG, "不符合的包:" + lpparam.packageName);
+//            return;
+//        }
 
         //固定格式
         XposedHelpers.findAndHookMethod(
@@ -201,41 +204,96 @@ public class HookTrack implements IXposedHookLoadPackage {
                 }
         );
 
-      XposedHelpers.findAndHookMethod(
-          "android.app.ActivityManager",
-          lpparam.classLoader,
-          "getRunningAppProcesses",
-          new DumpMethodHook() {
-            @Override
-            protected void beforeHookedMethod(MethodHookParam param) {
-              XposedBridge.log(lpparam.packageName + "调用getRunningAppProcesses()获取了正在运行的App");
-            }
-          }
-      );
+        XposedHelpers.findAndHookMethod(
+                "android.app.ActivityManager",
+                lpparam.classLoader,
+                "getRunningAppProcesses",
+                new DumpMethodHook() {
+                    @Override
+                    protected void beforeHookedMethod(MethodHookParam param) {
+                        XposedBridge.log(lpparam.packageName + "调用getRunningAppProcesses()获取了正在运行的App");
+                    }
+                }
+        );
 
 
-      XposedHelpers.findAndHookMethod(
-          "android.app.ApplicationPackageManager",
-          lpparam.classLoader,
-          "getInstalledPackages", int.class,
-          new DumpMethodHook() {
-            @Override
-            protected void beforeHookedMethod(MethodHookParam param) {
-              XposedBridge.log(lpparam.packageName + "调用getInstalledPackages()获取了当前用户安装的所有软件包的列表");
-            }
-          }
-      );
+        XposedHelpers.findAndHookMethod(
+                "android.app.ApplicationPackageManager",
+                lpparam.classLoader,
+                "getInstalledPackages", int.class,
+                new DumpMethodHook() {
+                    @Override
+                    protected void beforeHookedMethod(MethodHookParam param) {
+                        XposedBridge.log(lpparam.packageName + "调用getInstalledPackages()获取了当前用户安装的所有软件包的列表");
+                    }
+                }
+        );
 
-      XposedHelpers.findAndHookMethod(
-          "android.app.ApplicationPackageManager",
-          lpparam.classLoader,
-          "getInstalledApplications", int.class,
-          new DumpMethodHook() {
-            @Override
-            protected void beforeHookedMethod(MethodHookParam param) {
-              XposedBridge.log(lpparam.packageName + "调用getInstalledApplications()获取了当前用户安装的所有应用程序包的列表");
-            }
-          }
-      );
+        XposedHelpers.findAndHookMethod(
+                "android.app.ApplicationPackageManager",
+                lpparam.classLoader,
+                "getInstalledApplications", int.class,
+                new DumpMethodHook() {
+                    @Override
+                    protected void beforeHookedMethod(MethodHookParam param) {
+                        XposedBridge.log(lpparam.packageName + "调用getInstalledApplications()获取了当前用户安装的所有应用程序包的列表");
+                    }
+                }
+        );
+
+        XposedHelpers.findAndHookMethod(
+                ClipboardManager.class.getName(),
+                lpparam.classLoader,
+                "getPrimaryClip",
+                new DumpMethodHook() {
+                    @Override
+                    protected void beforeHookedMethod(MethodHookParam param) {
+
+                        XposedBridge.log(lpparam.packageName + "调用getPrimaryClip获取粘贴版");
+                    }
+                }
+        );
+
+        XposedHelpers.findAndHookMethod(
+                PackageManager.class.getName(),
+                lpparam.classLoader,
+                "queryIntentActivities",
+                Intent.class,
+                int.class,
+                new DumpMethodHook() {
+                    @Override
+                    protected void beforeHookedMethod(MethodHookParam param) {
+
+                        XposedBridge.log(lpparam.packageName +"调用queryIntentActivities获取了应用列表");
+                    }
+                }
+        );
+
+        XposedHelpers.findAndHookMethod(
+                PackageManager.class.getName(),
+                lpparam.classLoader,
+                "getLaunchIntentForPackage",
+                String.class,
+                new DumpMethodHook() {
+                    @Override
+                    protected void beforeHookedMethod(MethodHookParam param) {
+                        XposedBridge.log(lpparam.packageName +"调用getLaunchIntentForPackage后台启动app");
+                    }
+
+                }
+        );
+
+        XposedHelpers.findAndHookMethod(
+                java.net.NetworkInterface.class.getName(),
+                lpparam.classLoader,
+                "getNetworkInterfaces",
+                new DumpMethodHook() {
+                    @Override
+                    protected void beforeHookedMethod(MethodHookParam param) {
+                        XposedBridge.log(lpparam.packageName +"调用getNetworkInterfaces获取了mac地址");
+                    }
+
+                }
+        );
     }
 }
